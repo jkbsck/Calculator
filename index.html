@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>CALCULATOR</title>
+    </head>
+    <body>
+        <div id="container">
+            <div id="top-container">
+                <div id="dot1" class="dots"></div>
+                <div id="dot2" class="dots"></div>
+                <div id="name">count.IT</div>
+                <div id="display">
+                    <div id="display-numbers"></div>
+                </div>
+            </div>
+            <div id="bottom-container">
+                <div id="buttons">
+                  <div id="numbers">
+                      <div id="7">7</div>
+                      <div id="8">8</div>
+                      <div id="9">9</div>
+                      <div id="4">4</div>
+                      <div id="5">5</div>
+                      <div id="6">6</div>
+                      <div id="1">1</div>
+                      <div id="2">2</div>
+                      <div id="3">3</div>
+                      <div id="0">0</div>
+                      <div id=".">.</div>
+                  </div>
+                  <div id="operators">
+                      <div id="+">+</div>
+                      <div id="Del">&#5176</div>
+                      <div id="-">-</div>
+                      <div id="C">C</div>
+                      <div id="*">*</div>
+                      <div id="/">/</div>
+                      <div id="=">=</div>
+                  </div>  
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+
+<script>
+
+    // addition function
+    const add = function(a, b){
+        a = parseFloat(a, 10);
+        b = parseFloat(b, 10);
+        return a + b;
+    }
+
+    // substraction function
+    const substract = function(a, b){
+        return a - b;
+    }
+
+    // multiplication function
+    const multiply = function(a, b){
+        return a * b;
+    }
+
+    // division function
+    const divide = function(a, b){
+        return a / b;
+    }
+
+    const operate = function(numbers){
+
+        // operatorsAll stores all operators used from display
+        let operatorsAll = '';
+        for ( let i = 0; i < numbers.length; i++){
+            let x = numbers[i];
+            operatorsAll += ((x === '+' || x === '-' || x === '*' || x === '/') ? x : '');
+        }
+
+        // split string from display into array between operators
+        let numbersArray;
+        numbersArray = numbers.split('+').join(' ');
+        numbersArray = numbersArray.split('-').join(' ');
+        numbersArray = numbersArray.split('*').join(' ');
+        numbersArray = numbersArray.split('/').join(' ');
+        numbersArray = numbersArray.split(' ');
+
+        // this should execute operations (* /) primarily
+        for (let i = 0; i < operatorsAll.length; i++){
+            if (operatorsAll[i] === '*' || operatorsAll[i] === '/'){
+                let result = `${(operatorsAll[i] === '*') ? multiply(numbersArray[i], numbersArray[i + 1]) : divide(numbersArray[i], numbersArray[i + 1])}`;
+                numbersArray.splice(i, 2, result);
+                operatorsAll = operatorsAll.replace(operatorsAll[i],'');
+            }
+        }
+
+        // this executes other operations (+ -)
+        let operations = 0; // number of executed operations (+ -) - it should help navigate the ever shrinking numbersArray
+        for (let i = 0; i < operatorsAll.length; i++){
+            if (operatorsAll[i] === '+' || operatorsAll[i] === '-'){
+                let result = `${(operatorsAll[i] === '+') ? add(numbersArray[i - operations], numbersArray[i + 1 - operations]) : substract(numbersArray[i - operations], numbersArray[i + 1 - operations])}`;                            
+                numbersArray.splice(i - operations , 2, result);
+                operations++;
+            }
+        }
+        if ((numbersArray[0].indexOf('.') !== -1) || parseInt(numbersArray[0], 10) > 10e10) return parseFloat(numbersArray[0], 10).toPrecision(6);
+        return numbersArray;
+    }
+
+    const display = document.getElementById('display-numbers');
+
+    // assignment of numbers
+    const numbers = Array.from(document.getElementById('numbers').querySelectorAll('div'));
+    numbers.forEach((number) => {
+        number.addEventListener('click', (e) => {
+            display.textContent += number.id;
+            if (number.id === '.'){
+                number.style.display = 'none';
+            }
+            number.classList.remove('click-animation-num');
+            void number.offsetWidth;    // magical thing that succesfully reset the animation
+            number.classList.add('click-animation-num');      
+            const dot1 = document.getElementById('dot1');
+            dot1.classList.remove('dot1-animation');
+            void dot1.offsetWidth;    // magical thing that succesfully reset the animation
+            dot1.classList.add('dot1-animation');         
+        });
+
+        // keyboard assignment numbers
+        document.addEventListener('keydown', (e) => {
+            if (e.key === number.id){
+                display.textContent += number.id;
+                if (number.id === '.'){
+                    number.style.display = 'none';
+                }
+                number.classList.remove('click-animation-num');
+                void number.offsetWidth;    // magical thing that succesfully reset the animation
+                number.classList.add('click-animation-num');
+                dot1.classList.remove('dot1-animation');
+                void dot1.offsetWidth;    // magical thing that succesfully reset the animation
+                dot1.classList.add('dot1-animation');
+            };
+        });
+    });
+
+    // assignment of operators +-*/
+    const operators = Array.from(document.getElementById('operators').querySelectorAll('div'));
+    operators.forEach((operator) => {
+        if (operator.id === '=' || operator.id === 'C' || operator.id === 'Del') ;
+        else {
+            operator.addEventListener('click', (e) => {
+                display.textContent += operator.id;
+                if (document.getElementById('.').style.display === 'none' ){
+                    document.getElementById('.').style.display = 'block';
+                }
+                operator.classList.remove('click-animation-op');
+                void operator.offsetWidth;    // magical thing that succesfully reset the animation
+                operator.classList.add('click-animation-op');
+                const dot2 = document.getElementById('dot2');
+                dot2.classList.remove('dot2-animation');
+                void dot2.offsetWidth;    // magical thing that succesfully reset the animation
+                dot2.classList.add('dot2-animation');  
+            });
+
+            // keyboard assignment operators
+            document.addEventListener('keydown', (e) => {
+                if (e.key === operator.id){
+                    display.textContent += operator.id;
+                    if (document.getElementById('.').style.display === 'none' ){
+                        document.getElementById('.').style.display = 'block';
+                    }
+                    operator.classList.remove('click-animation-op');
+                    void operator.offsetWidth;    // magical thing that succesfully reset the animation
+                    operator.classList.add('click-animation-op');            
+                    const dot2 = document.getElementById('dot2');
+                    dot2.classList.remove('dot2-animation');
+                    void dot2.offsetWidth;    // magical thing that succesfully reset the animation
+                    dot2.classList.add('dot2-animation');   
+                };
+            });
+        };
+    });
+
+    // assignment of Del
+    const CLEAR = document.querySelector('#Del');
+    CLEAR.addEventListener('click', (e) => {        
+        let last = display.textContent.length - 1;        
+        display.textContent = display.textContent.split('').splice(0, last).join(''); // delete last character
+        if (display.textContent.indexOf('.') === -1){
+            document.getElementById('.').style.display = 'block';
+        }
+        CLEAR.classList.remove('click-animation-op');
+        void CLEAR.offsetWidth;    // magical thing that succesfully reset the animation
+        const dot2 = document.getElementById('dot2');
+            dot2.classList.remove('dot2-animation');
+            void dot2.offsetWidth;    // magical thing that succesfully reset the animation
+            dot2.classList.add('dot2-animation');
+    });
+
+    // keyboard assignment CLEAR
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace'){
+            let last = display.textContent.length - 1;        
+            display.textContent = display.textContent.split('').splice(0, last).join(''); // delete last character
+            if (display.textContent.indexOf('.') === -1){
+                document.getElementById('.').style.display = 'block';
+            }
+            CLEAR.classList.remove('click-animation-op');
+            void CLEAR.offsetWidth;    // magical thing that succesfully reset the animation
+            CLEAR.classList.add('click-animation-op');
+            const dot2 = document.getElementById('dot2');
+            dot2.classList.remove('dot2-animation');
+            void dot2.offsetWidth;    // magical thing that succesfully reset the animation
+            dot2.classList.add('dot2-animation');            
+        };
+    });
+
+    // assignment of clearAll
+    const clearAll = document.querySelector('#C');
+    clearAll.addEventListener('click', (e) => {
+        display.textContent = '';
+        if (document.getElementById('.').style.display === 'none' ){
+            document.getElementById('.').style.display = 'block';
+        }
+        clearAll.classList.remove('click-animation-op');
+        void clearAll.offsetWidth;    // magical thing that succesfully reset the animation
+        clearAll.classList.add('click-animation-op');
+        const dot2 = document.getElementById('dot2');
+            dot2.classList.remove('dot2-animation');
+            void dot2.offsetWidth;    // magical thing that succesfully reset the animation
+            dot2.classList.add('dot2-animation');
+    });
+
+    // keyboard assignment clearAll
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Delete'){
+            display.textContent = '';
+            if (document.getElementById('.').style.display === 'none' ){
+                document.getElementById('.').style.display = 'block';
+            }
+            clearAll.classList.remove('click-animation-op');
+            void clearAll.offsetWidth;    // magical thing that succesfully reset the animation
+            clearAll.classList.add('click-animation-op');
+            const dot2 = document.getElementById('dot2');
+            dot2.classList.remove('dot2-animation');
+            void dot2.offsetWidth;    // magical thing that succesfully reset the animation
+            dot2.classList.add('dot2-animation');            
+        };
+    });
+
+    // assignment of 'equals'
+    const equals = document.getElementById('=');
+    equals.addEventListener('click', (e) => {
+        display.textContent = operate(display.textContent);
+        equals.classList.remove('click-animation-op');
+        void equals.offsetWidth;    // magical thing that succesfully reset the animation
+        equals.classList.add('click-animation-op');
+        const dot2 = document.getElementById('dot2');
+        dot2.classList.remove('dot2-animation');
+        void dot2.offsetWidth;    // magical thing that succesfully reset the animation
+        dot2.classList.add('dot2-animation');
+    });
+
+    // keyboard assignment 'equals'
+    document.addEventListener('keydown', (e) => {
+        if (e.key === equals.id){
+            display.textContent = operate(display.textContent);
+            equals.classList.remove('click-animation-op');
+            void equals.offsetWidth;    // magical thing that succesfully reset the animation
+            equals.classList.add('click-animation-op');
+            const dot2 = document.getElementById('dot2');
+            dot2.classList.remove('dot2-animation');
+            void dot2.offsetWidth;    // magical thing that succesfully reset the animation
+            dot2.classList.add('dot2-animation');            
+        };
+    });
+
+</script>
+
+<style>
+    html {
+        background-image: url(/home/jkbsck/Desktop/the-odin-project/the-odin-project/CALCULATOR/wallpaper);
+    }
+    div {
+        border: outset 2px;
+    }
+    #container {
+        margin: 100px;
+        margin-top: 130px;
+        border: double 5px;
+        border-top-left-radius: 40px;
+        border-bottom-right-radius: 40px;
+        height: 500px;
+        width: 400px;
+        background: linear-gradient(30deg, rgba(184, 39, 228, 0.239), rgba(4, 126, 241, 0.294));
+    }
+    #top-container {
+        margin: 10px;
+        border: solid 1px;
+        border-top-left-radius: 30px;
+        height: 150px;
+    }
+    .dots {
+        position: absolute;
+        border: solid 1.5px;
+        height: 5px;
+        width: 5px;
+        border-radius: 50%;
+    }
+    #dot1 {
+        margin: 5px auto auto 40px;
+    }
+    #dot2 {
+        margin: 5px auto auto 50px;
+    }
+    @keyframes clickDot1 {
+        0%   {background-color: none;}
+        50%  {background-color: rgba(0, 255, 255, 0.9);}
+        100% {background-color: none;}
+    }
+    @keyframes clickDot2 {
+        0%   {background-color: none;}
+        50%  {background-color: rgba(255, 0, 255, 0.9);}
+        100% {background-color: none;}
+    }
+    .dot1-animation {
+        animation-name: clickDot1;
+        animation-duration: .2s;
+    }
+    .dot2-animation {
+        animation-name: clickDot2;
+        animation-duration: .2s;
+    }
+    #name {
+        float: right;
+        font-size: 20px;
+        font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        font-style: italic;
+        font-weight: bolder;
+        padding: 0px 3px 1px 20px;
+        border: 5px;
+        border-style:outset;
+        border-top-left-radius: 8px;
+        border-bottom-left-radius: 25px;
+    }
+    #display {
+        display: grid;
+        margin: 40px 10px 20px 10px;
+        height: 80px;   
+    }
+    @font-face {
+        font-family: bcdFont;
+        src: url(/home/jkbsck/Desktop/the-odin-project/the-odin-project/CALCULATOR/digital_7/digital-7-italic.ttf);
+    }
+    #display-numbers {        
+        float: right;
+        justify-self: end;
+        align-self: center;
+        margin-right: 10px;
+        font-size: 60px;
+        font-family: bcdFont;
+        max-width: 320px;
+        overflow: auto;
+        border: none;
+    }
+    #bottom-container {
+        margin: 10px;
+        border: solid 1px;
+        border-bottom-right-radius: 30px;
+    }
+    #buttons {
+        margin: 10px;
+        display: grid;
+        grid-template-columns: auto auto;
+        border: none;
+        font-weight: 300;
+    }
+    #numbers {
+        display: grid;
+        grid-template-columns: repeat(3, 60px);
+        grid-template-rows: repeat(4, 60px);
+        grid-gap: 10px;
+        border: none;
+    }
+    #\0 {
+        grid-area: 4 / 2 / 5 / 3;
+    }
+    #\. {
+        grid-area: 4 / 3 / 5 / 4;
+    }
+    #\= {
+        grid-area: 4 / 2 / 5 / 3;
+        border-bottom-right-radius: 20px;
+    }
+    #\/ {
+        grid-area: 4 / 1 / 5 / 2;
+    }
+    @keyframes clickNumber {
+        0%   {background-color: none;}
+        50%  {
+            background-color: rgba(0, 255, 255, 0.2);
+            font-size: 75px;
+            font-family: bcdFont;
+            text-align: center;
+        }
+        100% {background-color: none;}
+    }
+    @keyframes clickOperator {
+        0%   {background-color: none;}
+        50%  {
+            background-color: rgba(255, 0, 255, 0.2);
+            font-size: 75px;
+            font-family: bcdFont;
+            text-align: center;
+        }
+        100% {background-color: none;}
+    }
+    .click-animation-num {
+        animation-name: clickNumber;
+        animation-duration: .2s;
+    }
+    .click-animation-op {
+        animation-name: clickOperator;
+        animation-duration: .2s;
+    }
+    #operators {
+        display: grid;
+        justify-content: flex-end;
+        grid-template-columns: repeat(2, 60px);
+        grid-template-rows: repeat(3, 60px);
+        grid-gap: 10px;
+        border: none;
+    }
+</style>

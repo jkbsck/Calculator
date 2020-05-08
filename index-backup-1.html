@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>CALCULATOR</title>
+    </head>
+    <body>
+        <div id="container">
+            <div id="top-container">
+                <div id="name">count.IT</div>
+                <div id="display">
+                    <div id="display-numbers"></div>
+                </div>
+            </div>
+            <div id="bottom-container">
+                <div id="buttons">
+                  <div id="numbers">
+                      <div id="7">7</div>
+                      <div id="8">8</div>
+                      <div id="9">9</div>
+                      <div id="4">4</div>
+                      <div id="5">5</div>
+                      <div id="6">6</div>
+                      <div id="1">1</div>
+                      <div id="2">2</div>
+                      <div id="3">3</div>
+                      <div id="0">0</div>
+                  </div>
+                  <div id="operators">
+                      <div id="+">+</div>
+                      <div id="Del">Del</div>
+                      <div id="-">-</div>
+                      <div id="C">C</div>
+                      <div id="*">*</div>
+                      <div id="/">/</div>
+                      <div id="=">=</div>
+                  </div>  
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+
+<script>
+
+    // addition function
+    const add = function(a, b){
+        a = parseInt(a, 10);
+        b = parseInt(b, 10);
+        return a + b;
+    }
+
+    // substraction function
+    const substract = function(a, b){
+        return a - b;
+    }
+
+    // multiplication function
+    const multiply = function(a, b){
+        return a * b;
+    }
+
+    // division function
+    const divide = function(a, b){
+        return a / b;
+    }
+
+    const operate = function(numbers){
+
+        // operatorsAll stores all operators used from display
+        let operatorsAll = '';
+        for ( let i = 0; i < numbers.length; i++){
+            let x = numbers[i];
+            operatorsAll += ((x === '+' || x === '-' || x === '*' || x === '/') ? x : '');
+        }
+
+        // split string from display into array between operators
+        let numbersArray;
+        numbersArray = numbers.split('+').join(' ');
+        numbersArray = numbersArray.split('-').join(' ');
+        numbersArray = numbersArray.split('*').join(' ');
+        numbersArray = numbersArray.split('/').join(' ');
+        numbersArray = numbersArray.split(' ');
+
+        if (numbersArray.length === operatorsAll.length) return 'Yo, wrong input pal!';
+
+        // this should execute operations (* /) primarily
+        let operations1 = 0; // number of executed operations (* /) - it should help navigate the ever shrinking numbersArray
+        for (let i = 0; i < operatorsAll.length; i++){
+            if (operatorsAll[i] === '*' || operatorsAll[i] === '/'){
+                let result = `${(operatorsAll[i] === '*') ? multiply(numbersArray[i - operations1], numbersArray[i + 1 - operations1]) : divide(numbersArray[i - operations1], numbersArray[i + 1 - operations1])}`;
+                numbersArray.splice(i - operations1 , 2, result);
+                operatorsAll = operatorsAll.replace(operatorsAll[i],'');
+                //operatorsAll[i] = '';   
+                //operations1++;    
+                //return numbersArray + '...' + operatorsAll;       
+            }
+            //if (operatorsAll === '') break;
+        }
+        //return numbersArray;
+
+        // this executes other operations (+ -)
+        let operations2 = 0; // number of executed operations (+ -) - it should help navigate the ever shrinking numbersArray
+        for (let i = 0; i < operatorsAll.length; i++){
+            if (operatorsAll[i] === '+' || operatorsAll[i] === '-'){
+                let result = `${(operatorsAll[i] === '+') ? add(numbersArray[i - operations2], numbersArray[i + 1 - operations2]) : substract(numbersArray[i - operations2], numbersArray[i + 1 - operations2])}`;                            
+                numbersArray.splice(i - operations2 , 2, result);
+                operations2++;
+                //return numbersArray;
+                //return numbersArray + '...' + operatorsAll;
+            }
+        }
+
+        return numbersArray;
+
+        // this was the old code only able to operate single operations
+
+        /*let operator;
+        if (numbers[numbers.indexOf('+')]) operator = numbers[numbers.indexOf('+')];;   // if there is '+' in 'numbers', assign '+' to 'operetor'
+        if (numbers[numbers.indexOf('-')]) operator = numbers[numbers.indexOf('-')];
+        if (numbers[numbers.indexOf('*')]) operator = numbers[numbers.indexOf('*')];;
+        if (numbers[numbers.indexOf('/')]) operator = numbers[numbers.indexOf('/')];;
+        
+        numbers = numbers.split(operator);  // split string into array on operator
+        const numberOne = parseInt(numbers[0], 10); // assignment of int numbers
+        const numberTwo = parseInt(numbers[1], 10);
+        let result = 0;
+
+        switch (operator){
+            case '+': result = add(numberOne, numberTwo); break;
+            case '-': result = substract(numberOne, numberTwo); break;
+            case '*': result = multiply(numberOne, numberTwo); break;
+            case '/': result = divide(numberOne, numberTwo); break;
+        }
+
+        return result;*/
+    }
+
+    const display = document.getElementById('display-numbers');
+
+    // assignment of numbers
+    const numbers = Array.from(document.getElementById('numbers').querySelectorAll('div'));
+    numbers.forEach((number) => {
+        number.addEventListener('click', (e) => {
+            display.textContent += number.id;
+            number.classList.remove('click-animation');
+            void number.offsetWidth;    // magical thing that succesfully reset the animation
+            number.classList.add('click-animation');            
+        });
+    });
+
+    // assignment of operators +-*/
+    const operators = Array.from(document.getElementById('operators').querySelectorAll('div'));
+    operators.forEach((operator) => {
+        if (operator.id === '=' || operator.id === 'C' || operator.id === 'Del') ;
+        else {
+            operator.addEventListener('click', (e) => {
+                display.textContent += operator.id;
+                operator.classList.remove('click-animation');
+                void operator.offsetWidth;    // magical thing that succesfully reset the animation
+                operator.classList.add('click-animation');
+            });
+        };
+    });
+
+    // assignment of Del
+    const CLEAR = document.querySelector('#Del');
+    CLEAR.addEventListener('click', (e) => {
+        let last = display.textContent.length - 1;
+        display.textContent = display.textContent.split('').splice(0, last).join(''); // delete last character
+        CLEAR.classList.remove('click-animation');
+        void CLEAR.offsetWidth;    // magical thing that succesfully reset the animation
+        CLEAR.classList.add('click-animation');
+    });
+
+    // assignment of clearAll
+    const clearAll = document.querySelector('#C');
+    clearAll.addEventListener('click', (e) => {
+        display.textContent = '';
+        CLEAR.classList.remove('click-animation');
+        void CLEAR.offsetWidth;    // magical thing that succesfully reset the animation
+        CLEAR.classList.add('click-animation');
+    });
+
+    // assignment of 'equals'
+    const equals = document.getElementById('=');
+    equals.addEventListener('click', (e) => {
+        display.textContent = operate(display.textContent);
+        CLEAR.classList.remove('click-animation');
+        void CLEAR.offsetWidth;    // magical thing that succesfully reset the animation
+        CLEAR.classList.add('click-animation');
+    });
+
+</script>
+
+<style>
+    div {
+        border: solid 1px;
+    }
+    #container {
+        margin: 100px;
+        border: solid;
+        height: 500px;
+        width: 400px;
+    }
+    #top-container {
+        margin: 10px;
+        border: solid 1px;
+        height: 150px;
+    }
+    #name {
+        float: right;
+    }
+    #display {
+        display: grid;
+        margin: 40px 10px 20px 10px;
+        height: 80px;
+    }
+    @font-face {
+        font-family: bcdFont;
+        src: url(/home/jkbsck/Desktop/the-odin-project/the-odin-project/CALCULATOR/digital_7/digital-7-italic.ttf);
+    }
+    #display-numbers {        
+        float: right;
+        justify-self: end;
+        align-self: center;
+        margin-right: 10px;
+        font-size: 60px;
+        font-family: bcdFont;
+    }
+    #bottom-container {
+        margin: 10px;
+        border: solid 1px;
+    }
+    #buttons {
+        margin: 10px;
+        display: grid;
+        grid-template-columns: auto auto;
+    }
+    #numbers {
+        display: grid;
+        grid-template-columns: repeat(3, 60px);
+        grid-template-rows: repeat(4, 60px);
+        grid-gap: 10px;
+    }
+    @keyframes clickNumber {
+        0%   {background-color: white;}
+        50%  {background-color: rgba(57, 173, 240, 0.795);}
+        100% {background-color: white;}
+    }
+    .click-animation {
+        animation-name: clickNumber;
+        animation-duration: .2s;
+    }
+    #operators {
+        display: grid;
+        justify-content: flex-end;
+        grid-template-columns: repeat(2, 60px);
+        grid-template-rows: repeat(3, 60px);
+        grid-gap: 10px;
+    }
+</style>
